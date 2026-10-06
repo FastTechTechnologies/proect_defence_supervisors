@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Defence Supervisor Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        h2 { color: #333; margin-bottom: 15px; text-align: center; font-size: 22px; }
+        .brief-message {
+            background: #ebf4ff; color: #2b6cb0; padding: 15px;
+            border-radius: 8px; margin-bottom: 20px; font-size: 14px;
+            line-height: 1.5; text-align: center; border-left: 4px solid #4299e1;
+        }
+        .brief-message strong { color: #2c5282; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
+        input {
+            width: 100%; padding: 12px; border: 2px solid #ddd;
+            border-radius: 5px; font-size: 16px; transition: border-color 0.3s;
+        }
+        input:focus { outline: none; border-color: #667eea; }
+        button {
+            width: 100%; padding: 12px; background: #667eea; color: white;
+            border: none; border-radius: 5px; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: background 0.3s;
+        }
+        button:hover { background: #5a67d8; }
+        .error { color: #e53e3e; margin-top: 10px; text-align: center; font-size: 14px; }
+        .info-card {
+            background: #f7fafc; border-radius: 8px; padding: 20px;
+            margin-top: 20px; border: 1px solid #e2e8f0;
+        }
+        .info-row {
+            display: flex; flex-direction: column;
+            padding: 12px 0; border-bottom: 1px solid #e2e8f0;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-weight: bold; color: #4a5568; margin-bottom: 4px; font-size: 14px; }
+        .info-value { color: #2d3748; font-weight: 500; font-size: 16px; }
+        .info-value.supervisor { color: #667eea; font-weight: bold; }
+        .logout-btn { background: #e53e3e; margin-top: 20px; }
+        .logout-btn:hover { background: #c53030; }
+        .hidden { display: none; }
+        .success-message {
+            background: #c6f6d5; color: #22543d; padding: 10px;
+            border-radius: 5px; margin-bottom: 20px; text-align: center; font-weight: bold;
+        }
+        footer {
+            color: white; text-align: center; font-size: 14px;
+            margin-top: 10px; opacity: 0.9;
+        }
+        footer strong { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginSection">
+            <h2>Project Defence Portal</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 15px; font-size: 14px; font-weight: bold;">Module 3 Term 7B</p>
+            
+            <div class="brief-message">
+                Use this system to check your assigned supervisor and liase with them for project defence before the deadline for defence and project approval: <strong>16/10/2026</strong>.
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="admissionNumber">Admission Number:</label>
+                    <input type="text" id="admissionNumber" placeholder="e.g., 119118" required>
+                </div>
+                <button type="submit">Login</button>
+                <div id="errorMessage" class="error hidden"></div>
+            </form>
+        </div>
+
+        <!-- Student Info Section -->
+        <div id="infoSection" class="hidden">
+            <div class="success-message">✓ Login Successful</div>
+            <h2>Student Details</h2>
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Admission No:</span>
+                    <span class="info-value" id="displayAdmission"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Student Name:</span>
+                    <span class="info-value" id="displayName"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Project Title:</span>
+                    <span class="info-value" id="displayProject"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Assigned Supervisor:</span>
+                    <span class="info-value supervisor" id="displaySupervisor"></span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <footer>
+        Designed by <strong>Jonathan Mawia</strong> &rarr; Trade Project Trainer and Supervisor
+    </footer>
+
+    <script>
+        // --- CORRECTED Student Database (Exact match to Book1.xlsx) ---
+        const students = {
+            // Mr mawia's Group
+            "119118": { name: "Ignatius Malcom Maina", project: "leave and attendance management system", supervisor: "Mr mawia" },
+            "119952": { name: "Annah Mutheu Kikuvi", project: "Digital health records management systems", supervisor: "Mr mawia" },
+            "122244": { name: "Ryan Mburu Ndiritu", project: "gym management system", supervisor: "Mr mawia" },
+            "122260": { name: "Denis Maina Kinyua", project: "smart train tracking and management system", supervisor: "Mr mawia" },
+
+            // Mr juma's Group
+            "122421": { name: "Belidah Nyambura Njuguna", project: "automated event management system", supervisor: "Mr juma" },
+            "122436": { name: "George Wakang'u Mwaura", project: "student assisistance managemnet system", supervisor: "Mr juma" },
+            "122453": { name: "Frasiah Muthoni Macharia", project: "class session management system", supervisor: "Mr juma" },
+
+            // Mr mwinzi's Group
+            "122473": { name: "Erick Enoch Kamanja Mwaura", project: "online flower management system", supervisor: "Mr mwinzi" },
+            "122546": { name: "Mary Wangui Kimani", project: "Health alert management system", supervisor: "Mr mwinzi" },
+            "122574": { name: "Cynthia Kemunto Mochama", project: "Intergrated Breakdown Management system", supervisor: "Mr mwinzi" },
+            "122647": { name: "Emmanuel Gichuki Kibui", project: "product expiry tracker management system", supervisor: "Mr mwinzi" },
+
+            // Mr musa's Group
+            "122712": { name: "Penina Wangui Wanjohi", project: "Intergrated online hotel resrvation managemnt system", supervisor: "Mr musa" },
+            "122779": { name: "Ruth Wanjiku Muturi", project: "smart que management system", supervisor: "Mr musa" },
+            "123309": { name: "Lion Ledonyo", project: "electronics management system", supervisor: "Mr musa" },
+            "123719": { name: "Agnes Wangui Njambi", project: "modaka fuel management system", supervisor: "Mr musa" },
+
+            // Mr musila's Group
+            "123796": { name: "Kennedy Murimi Ngatia", project: "farm produce and financial managent system", supervisor: "Mr musila" },
+            "123977": { name: "Isaac Imana Ntoyian", project: "title missing", supervisor: "Mr musila" },
+            "124276": { name: "William Mbuthia Ndegwa", project: "tailoring orders management system", supervisor: "Mr musila" },
+
+            // Mr ndiso's Group
+            "124320": { name: "Diallo Ndatinda", project: "agricultural producttrading system", supervisor: "Mr ndiso" },
+            "124427": { name: "Evans Waweru", project: "online food ordering system", supervisor: "Mr ndiso" },
+            "124654": { name: "Peter Mwangi Chege", project: "Dermer Skin care management system", supervisor: "Mr ndiso" },
+
+            // Mr nyoro's Group
+            "124818": { name: "Paul Bundi", project: "news pulse management system", supervisor: "Mr nyoro" },
+            "124886": { name: "Florence Wanjiru Gachugu", project: "hospital appointment management system", supervisor: "Mr nyoro" },
+            "128973": { name: "David Ndigirigi Wanja", project: "hospital wards visitors management system", supervisor: "Mr nyoro" },
+            "123526": { name: "John Gitahi Wanjiru", project: "digital literacy and memory reconstruction system", supervisor: "Mr nyoro" },
+
+            // md Maureen's Group
+            "122316": { name: "Lawrence Njugi Ndichu", project: "Financial Account Management System", supervisor: "md Maureen" },
+            "123964": { name: "Sarah Gati Japhet", project: "library management system", supervisor: "md Maureen" },
+            "124500": { name: "Silvia Njeri Warui", project: "smart inventory management", supervisor: "md Maureen" }
+        };
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const admissionNumber = document.getElementById('admissionNumber').value.trim();
+            const errorDiv = document.getElementById('errorMessage');
+            
+            if (students[admissionNumber]) {
+                const student = students[admissionNumber];
+                
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('infoSection').classList.remove('hidden');
+                
+                document.getElementById('displayAdmission').textContent = admissionNumber;
+                document.getElementById('displayName').textContent = student.name;
+                document.getElementById('displayProject').textContent = student.project;
+                document.getElementById('displaySupervisor').textContent = student.supervisor;
+                
+                document.getElementById('admissionNumber').value = '';
+                errorDiv.classList.add('hidden');
+            } else {
+                errorDiv.textContent = 'Invalid admission number. Please check and try again.';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+
+        // Logout function
+        function logout() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('infoSection').classList.add('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('admissionNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
